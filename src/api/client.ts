@@ -22,6 +22,10 @@ async function parseResponse(response: Response): Promise<unknown> {
   try {
     return JSON.parse(text);
   } catch {
+    const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
+    if (contentType.includes('text/html') || /<!doctype html|<html[\s>]/i.test(text)) {
+      return { detail: 'The server encountered an error. Please try again.' };
+    }
     return { detail: text };
   }
 }

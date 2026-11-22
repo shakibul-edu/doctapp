@@ -2,6 +2,7 @@ import { request } from '@/api/client';
 import type {
   Chamber, Doctor, DoctorAssistant, DoctorAssistantCreate,
   DoctorFilterOptions, DoctorHospitalOption, DoctorSpecialtyOption, Hospital, Paginated, PatientProfile,
+  AvailabilityResponse, Appointment, DoctorSchedule, ScheduleException,
 } from '@/types/domain';
 
 export type FilterOptionsResponse = DoctorFilterOptions;
@@ -20,6 +21,38 @@ export type DoctorFilters = {
 };
 
 export const domainApi = {
+  availability: (doctorId: string, params: { date?: string; chamber?: string; from?: string; to?: string }) => {
+    const search = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) search.set(key, value);
+    });
+    const query = search.toString();
+    return request<AvailabilityResponse>(`/doctors/${doctorId}/availability/${query ? `?${query}` : ''}`);
+  },
+  createAppointment: (body: { doctor: string; chamber: string; start_at: string; patient_notes?: string }) =>
+    request<Appointment>('/appointments/', { method: 'POST', body }),
+  appointments: () => request<Paginated<Appointment> | Appointment[]>('/appointments/me/'),
+  appointment: (id: string) => request<Appointment>(`/appointments/${id}/`),
+  cancelAppointment: (id: string, reason: string) =>
+    request<Appointment>(`/appointments/${id}/cancel/`, { method: 'POST', body: { reason } }),
+  confirmAppointment: (id: string) =>
+    request<Appointment>(`/appointments/${id}/confirm/`, { method: 'POST', body: {} }),
+  completeAppointment: (id: string) =>
+    request<Appointment>(`/appointments/${id}/complete/`, { method: 'POST', body: {} }),
+  schedules: () => request<Paginated<DoctorSchedule> | DoctorSchedule[]>('/doctors/me/schedules/'),
+  createSchedule: (body: Record<string, unknown>) =>
+    request<DoctorSchedule>('/doctors/me/schedules/', { method: 'POST', body }),
+  updateSchedule: (id: string, body: Record<string, unknown>) =>
+    request<DoctorSchedule>(`/doctors/me/schedules/${id}/`, { method: 'PATCH', body }),
+  deleteSchedule: (id: string) =>
+    request<void>(`/doctors/me/schedules/${id}/`, { method: 'DELETE' }),
+  scheduleExceptions: () => request<Paginated<ScheduleException> | ScheduleException[]>('/doctors/me/schedule-exceptions/'),
+  createScheduleException: (body: Record<string, unknown>) =>
+    request<ScheduleException>('/doctors/me/schedule-exceptions/', { method: 'POST', body }),
+  updateScheduleException: (id: string, body: Record<string, unknown>) =>
+    request<ScheduleException>(`/doctors/me/schedule-exceptions/${id}/`, { method: 'PATCH', body }),
+  deleteScheduleException: (id: string) =>
+    request<void>(`/doctors/me/schedule-exceptions/${id}/`, { method: 'DELETE' }),
   patientMe: () => request<PatientProfile>('/patients/me/'),
   updatePatientMe: (body: Record<string, unknown> | FormData) =>
     request<PatientProfile>('/patients/me/', { method: 'PATCH', body }),

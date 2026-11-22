@@ -51,6 +51,10 @@ export default function ProfileScreen() {
     {role === 'assistant' && <Link href={'/(app)/associated-doctors' as never} style={styles.link}>Associated doctors</Link>}
     <Link href={'/(app)/hospitals' as never} style={styles.link}>Browse hospitals</Link>
     {role === 'patient' && <Link href="/change-password" style={styles.link}>Change password</Link>}
+    {role === 'patient' && <Link href={'/(app)/appointment' as never} style={styles.link}>My appointments</Link>}
+    {role === 'doctor' && <Link href={'/(app)/schedules' as never} style={styles.link}>Manage schedules</Link>}
+    {role === 'doctor' && <Link href={'/(app)/schedule-exceptions' as never} style={styles.link}>Schedule exceptions</Link>}
+    {(role === 'doctor' || role === 'assistant') && <Link href={'/(app)/doctor-appointments' as never} style={styles.link}>Manage appointments</Link>}
     <Button title="Sign out" onPress={() => void signOut()} />
   </ScrollView>;
 }

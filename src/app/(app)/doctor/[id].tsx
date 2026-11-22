@@ -1,4 +1,4 @@
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -68,6 +68,18 @@ export default function DoctorDetailScreen() {
       {doctor.chambers?.length ? <Text>Chambers: {doctor.chambers.map((chamber) => chamber.chamber_name || chamber.address).filter(Boolean).join(', ')}</Text> : null}
       {doctor.verification_status ? <Text>Verification: {doctor.verification_status}</Text> : null}
       <Text>Updated: {formatDate(doctor.updated_at)}</Text>
+      {doctor.verification_status === 'APPROVED' && doctor.chambers?.some((chamber) => chamber.active !== false) && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Book appointment"
+          style={styles.bookButton}
+          onPress={() => router.push({
+            pathname: '/(app)/book/availability',
+            params: { doctorId: String(doctor.id) },
+          } as never)}>
+          <Text style={styles.bookText}>Book Appointment</Text>
+        </Pressable>
+      )}
     </>}
   </ScrollView></>;
 }
@@ -82,4 +94,6 @@ const styles = StyleSheet.create({
   errorState: { alignItems: 'center', gap: 8 },
   retry: { minHeight: 48, borderRadius: 10, backgroundColor: '#1769aa', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
   retryText: { color: '#fff', fontWeight: '700' },
+  bookButton: { minHeight: 52, marginTop: 8, borderRadius: 12, backgroundColor: '#1769aa', alignItems: 'center', justifyContent: 'center' },
+  bookText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });
