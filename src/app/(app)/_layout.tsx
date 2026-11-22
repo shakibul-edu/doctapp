@@ -16,5 +16,12 @@ export default function AppLayout() {
     <Stack.Screen name="hospitals" options={{ headerShown: true, title: 'Hospitals' }} />
     <Stack.Screen name="associated-doctors" options={{ headerShown: true, title: 'Associated doctors' }} />
     <Stack.Screen name="doctor/[id]" options={{ headerShown: true, title: 'Doctor' }} />
+    <Stack.Screen name="book/availability" options={{ headerShown: true, title: 'Choose a time' }} />
+    <Stack.Screen name="book/confirm" options={{ headerShown: true, title: 'Confirm booking' }} />
+    <Stack.Screen name="appointment/index" options={{ headerShown: true, title: 'My appointments' }} />
+    <Stack.Screen name="appointment/[id]" options={{ headerShown: true, title: 'Appointment details' }} />
+    <Stack.Screen name="schedules" options={{ headerShown: true, title: 'Schedule management' }} />
+    <Stack.Screen name="schedule-exceptions" options={{ headerShown: true, title: 'Schedule exceptions' }} />
+    <Stack.Screen name="doctor-appointments" options={{ headerShown: true, title: 'Appointments' }} />
   </Stack>;
 }

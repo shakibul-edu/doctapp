@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ApiError } from '@/types/auth';
 import {
   buildDoctorFilterQuery, errorMessage, formatFee, formatLanguages,
-  normalizeSpecializationName, removeStaleSpecialty, roleName,
+  normalizeSpecializationName, removeStaleSpecialty, roleName, schedulesOverlap,
 } from '@/utils/domain';
 
 describe('domain utilities', () => {
@@ -25,6 +25,21 @@ describe('domain utilities', () => {
   it('normalizes validation field errors', () => {
     const error = new ApiError(400, { address: ['This field is required.'] });
     expect(errorMessage(error)).toBe('address: This field is required.');
+  });
+
+  it('does not expose backend HTML errors', () => {
+    const error = new ApiError(500, { detail: '<!DOCTYPE html><html><body>Internal Server Error</body></html>' });
+    expect(errorMessage(error)).toBe('The server encountered an error. Please try again.');
+  });
+
+  it('normalizes duplicate schedule errors', () => {
+    const error = new ApiError(400, { non_field_errors: ['The schedule fields chamber, weekday must make a unique set.'] });
+    expect(errorMessage(error)).toBe('This schedule already exists for the selected chamber and weekday.');
+  });
+
+  it('detects overlapping schedules while allowing adjacent times', () => {
+    expect(schedulesOverlap('09:00', '12:00', '11:30', '17:00')).toBe(true);
+    expect(schedulesOverlap('09:00', '12:00', '12:00', '17:00')).toBe(false);
   });
 
   it('builds only active doctor filter query parameters', () => {

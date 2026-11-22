@@ -4,15 +4,58 @@ export function roleName(role: string): string {
   return role.toLowerCase();
 }
 
+export function timeToMinutes(value: string): number | null {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+export function schedulesOverlap(
+  startA: string,
+  endA: string,
+  startB: string,
+  endB: string,
+): boolean {
+  const startMinutesA = timeToMinutes(startA);
+  const endMinutesA = timeToMinutes(endA);
+  const startMinutesB = timeToMinutes(startB);
+  const endMinutesB = timeToMinutes(endB);
+  if (
+    startMinutesA === null || endMinutesA === null ||
+    startMinutesB === null || endMinutesB === null
+  ) return false;
+  return startMinutesA < endMinutesB && endMinutesA > startMinutesB;
+}
+
+function isHtmlText(value: string): boolean {
+  return /<!doctype html|<html[\s>]|<body[\s>]|<script[\s>]|<title[\s>]/i.test(value);
+}
+
 export function errorMessage(error: unknown, fallback = 'Unable to complete the request.') {
   if (error instanceof ApiError) {
     const values = Object.entries(error.payload).flatMap(([field, value]) => {
-      if (field === 'detail') return [String(value)];
+      if (field === 'detail') {
+        const detail = typeof value === 'string' ? value : '';
+        if (!detail) return [];
+        if (isHtmlText(detail)) return ['The server encountered an error. Please try again.'];
+        if (/duplicate|already exists|unique constraint|must make a unique set/i.test(detail)) {
+          return ['This schedule already exists for the selected chamber and weekday.'];
+        }
+        return [detail];
+      }
       const messages = Array.isArray(value) ? value : [value];
-      return messages.filter((item) => typeof item === 'string').map((item) => `${field}: ${item}`);
+      return messages
+        .filter((item): item is string => typeof item === 'string')
+        .filter((item) => !isHtmlText(item))
+        .map((item) => /duplicate|already exists|unique constraint|must make a unique set/i.test(item)
+          ? 'This schedule already exists for the selected chamber and weekday.'
+          : `${field}: ${item}`);
     });
     if (error.status === 403) return 'You do not have permission to perform this action.';
     if (error.status === 404) return 'The requested information was not found.';
+    if (error.status >= 500) return values[0] && !isHtmlText(values[0])
+      ? values[0]
+      : 'The server encountered an error. Please try again.';
     return values[0] ?? fallback;
   }
   return error instanceof Error ? error.message : fallback;
@@ -84,4 +127,35 @@ export function removeStaleSpecialty<T extends string>(
   available: T[],
 ): T | '' {
   return available.includes(selected) ? selected : '';
+}
+
+export function formatUtcDateTime(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+export function formatLocalTime(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+
+export function formatLocalDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+export function localDateInput(date: Date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }

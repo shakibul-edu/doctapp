@@ -13,7 +13,10 @@ export default function AssociatedDoctorsScreen() {
   const [error, setError] = useState('');
   useEffect(() => {
     if (!user || roleName(user.role) !== 'assistant') return;
-    domainApi.assistantDoctors().then((page) => setDoctors(page.results))
+    domainApi.assistantDoctors().then((page) => {
+      const associated = Array.isArray(page) ? page : page.results;
+      setDoctors(associated.filter((doctor) => doctor.verification_status === 'APPROVED'));
+    })
       .catch((reason) => setError(errorMessage(reason, 'Unable to load associated doctors.')))
       .finally(() => setLoading(false));
   }, [user?.id]);
@@ -22,6 +25,12 @@ export default function AssociatedDoctorsScreen() {
   if (loading) return <View style={styles.center}><ActivityIndicator /><Text>Loading associated doctors...</Text></View>;
   return <View style={styles.container}>
     <Text style={styles.title}>Associated doctors</Text>
+    <TouchableOpacity
+      accessibilityRole="button"
+      style={styles.appointments}
+      onPress={() => router.push('/(app)/doctor-appointments' as never)}>
+      <Text style={styles.appointmentsText}>Manage associated appointments</Text>
+    </TouchableOpacity>
     {!!error && <Text style={styles.error}>{error}</Text>}
     <FlatList
       data={doctors}
@@ -43,4 +52,6 @@ const styles = StyleSheet.create({
   card: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 14, marginBottom: 10, gap: 4 },
   name: { fontSize: 17, fontWeight: '700' },
   error: { color: '#b00020' },
+  appointments: { minHeight: 48, borderRadius: 10, backgroundColor: '#1769aa', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  appointmentsText: { color: '#fff', fontWeight: '700' },
 });
