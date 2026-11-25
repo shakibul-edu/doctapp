@@ -235,7 +235,7 @@ export default function SchedulesScreen() {
               mode="time"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               is24Hour
-              onChange={onTimeChange}
+              onValueChange={onTimeChange}
               onDismiss={() => setTimePicker(null)}
             />
           )}

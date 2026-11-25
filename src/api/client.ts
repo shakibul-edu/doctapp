@@ -1,6 +1,6 @@
 import { apiUrl } from '@/config/api';
 import { clearTokens, loadTokens, saveTokens } from '@/storage/tokens';
-import { ApiError, ApiErrorPayload, AuthTokens } from '@/types/auth';
+import { ApiError, ApiErrorPayload, AuthenticatedUser, AuthTokens } from '@/types/auth';
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
@@ -111,7 +111,8 @@ export async function request<T>(path: string, options: RequestOptions = {}, ret
 
 export const api = {
   health: () => request<{ status?: string }>('/health/', { skipAuth: true }),
-  register: (body: Record<string, unknown>) => request<AuthTokens>('/accounts/register/', { method: 'POST', body, skipAuth: true }),
+  register: (body: Record<string, unknown>) =>
+    request<AuthenticatedUser>('/accounts/register/', { method: 'POST', body, skipAuth: true }),
   login: (body: { email: string; password: string }) => request<AuthTokens>('/accounts/login/', { method: 'POST', body, skipAuth: true }),
   refresh: () => refreshTokens(),
   logout: async () => {

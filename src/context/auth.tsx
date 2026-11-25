@@ -95,7 +95,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const signUp = async (values: Record<string, unknown>) => {
     setError(null);
     try {
-      const tokens = await api.register(values);
+      const registered = await api.register(values);
+      if (!isActive(registered)) {
+        throw new Error('Your account is awaiting approval.');
+      }
+      if (typeof values.email !== 'string' || typeof values.password !== 'string') {
+        throw new Error('Registration details are incomplete.');
+      }
+      const tokens = await api.login({ email: values.email, password: values.password });
       await saveTokens(tokens);
       const current = await api.me();
       if (!isActive(current)) {

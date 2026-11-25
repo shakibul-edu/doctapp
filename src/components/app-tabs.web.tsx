@@ -7,11 +7,14 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Image, Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { roleName } from '@/utils/domain';
+import { domainApi } from '@/api/domain';
+import { mediaUrl } from '@/config/api';
 
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
@@ -20,6 +23,20 @@ import { ThemedView } from './themed-view';
 export default function AppTabs() {
   const { user } = useAuth();
   const role = user ? roleName(user.role) : '';
+  const [patientImage, setPatientImage] = useState<{ userId: string; url: string | null } | null>(null);
+  const accountProfileImageUrl = mediaUrl(user?.profile_image ?? null);
+
+  useEffect(() => {
+    if (!user || role !== 'patient') return;
+    const userId = String(user.id);
+    void domainApi.patientMe()
+      .then((patient) => setPatientImage({ userId, url: mediaUrl(patient.profile_picture) }))
+      .catch(() => setPatientImage({ userId, url: accountProfileImageUrl }));
+  }, [user, role, accountProfileImageUrl]);
+
+  const profileImageUrl = role === 'patient'
+    ? patientImage?.userId === String(user?.id) ? patientImage.url : accountProfileImageUrl
+    : accountProfileImageUrl;
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -31,11 +48,12 @@ export default function AppTabs() {
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>Explore</TabButton>
           </TabTrigger>
-          {(role === 'doctor' || role === 'assistant') && (
-            <TabTrigger name="profile" href="/profile" asChild>
-              <TabButton>{role === 'doctor' ? 'Manage' : 'Doctors'}</TabButton>
-            </TabTrigger>
-          )}
+          <TabTrigger name="profile" href="/profile" asChild>
+            <TabButton>
+              {user && profileImageUrl ? <Image source={{ uri: profileImageUrl }} style={styles.avatar} /> : null}
+              {!user ? 'Sign in' : role === 'doctor' ? 'Manage' : role === 'assistant' ? 'Doctors' : 'Profile'}
+            </TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -85,6 +103,11 @@ export function CustomTabList(props: TabListProps) {
 }
 
 const styles = StyleSheet.create({
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
   tabListContainer: {
     position: 'absolute',
     width: '100%',

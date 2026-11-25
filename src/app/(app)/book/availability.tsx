@@ -97,10 +97,11 @@ export default function AvailabilityScreen() {
             value={new Date(`${date}T12:00:00`)}
             mode="date"
             minimumDate={new Date()}
-            onChange={(_, selected) => {
+            onValueChange={(_, selected) => {
               setDatePicker(false);
               if (selected) setDate(localDateInput(selected));
             }}
+            onDismiss={() => setDatePicker(false)}
           />
         )}
         <Text style={styles.timezone}>Times shown in your local timezone</Text>

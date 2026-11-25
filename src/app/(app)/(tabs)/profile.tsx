@@ -28,7 +28,10 @@ export default function ProfileScreen() {
   };
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load(); }, [user?.id]);
-  if (!user) return null;
+  if (!user) return <View style={styles.center}>
+    <Text style={styles.title}>Welcome to DocTapp</Text>
+    <Link href="/(auth)/login" style={styles.signInLink}>Sign in</Link>
+  </View>;
   const role = roleName(user.role);
   if (loading) return <View style={styles.center}><ActivityIndicator /><Text>Loading profile...</Text></View>;
   const profileImageUrl = mediaUrl(role === 'patient' ? patient?.profile_picture ?? null : user.profile_image);
@@ -64,5 +67,6 @@ const styles = StyleSheet.create({
   image: { width: 96, height: 96, borderRadius: 48, alignSelf: 'center' },
   title: { fontSize: 28, fontWeight: '700', textAlign: 'center' },
   link: { color: '#1769aa', paddingVertical: 10 },
+  signInLink: { color: '#1769aa', fontSize: 16, fontWeight: '700', paddingVertical: 12 },
   error: { color: '#b00020' },
 });

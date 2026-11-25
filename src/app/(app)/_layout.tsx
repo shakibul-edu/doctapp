@@ -1,11 +1,10 @@
-import { Redirect, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 
 import { useAuth } from '@/context/auth';
 
 export default function AppLayout() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   if (loading) return null;
-  if (!user) return <Redirect href="/(auth)/login" />;
   return <Stack screenOptions={{ headerShown: false }}>
     <Stack.Screen name="(tabs)" />
     <Stack.Screen name="edit-profile" options={{ headerShown: true, title: 'Edit profile' }} />
