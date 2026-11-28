@@ -19,8 +19,9 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function isActive(user: AuthenticatedUser): boolean {
-  return user.account_status.toLowerCase() === 'active';
+function isActive(user: { account_status?: unknown } | null | undefined): boolean {
+  const status = user?.account_status;
+  return typeof status === 'string' && status.toLowerCase() === 'active';
 }
 
 function messageFor(error: unknown): string {
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setError(null);
     try {
       const registered = await api.register(values);
-      if (!isActive(registered)) {
+      if (typeof registered?.account_status === 'string' && !isActive(registered)) {
         throw new Error('Your account is awaiting approval.');
       }
       if (typeof values.email !== 'string' || typeof values.password !== 'string') {

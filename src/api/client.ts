@@ -112,7 +112,7 @@ export async function request<T>(path: string, options: RequestOptions = {}, ret
 export const api = {
   health: () => request<{ status?: string }>('/health/', { skipAuth: true }),
   register: (body: Record<string, unknown>) =>
-    request<AuthenticatedUser>('/accounts/register/', { method: 'POST', body, skipAuth: true }),
+    request<Partial<Pick<AuthenticatedUser, 'account_status'>>>('/accounts/register/', { method: 'POST', body, skipAuth: true }),
   login: (body: { email: string; password: string }) => request<AuthTokens>('/accounts/login/', { method: 'POST', body, skipAuth: true }),
   refresh: () => refreshTokens(),
   logout: async () => {

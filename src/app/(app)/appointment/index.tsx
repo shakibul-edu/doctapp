@@ -87,8 +87,8 @@ export default function MyAppointmentsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  filters: { gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
-  filter: { minHeight: 40, borderWidth: 1, borderColor: '#D8DAE0', borderRadius: 999, paddingHorizontal: 14, justifyContent: 'center' },
+  filters: { gap: 8, paddingHorizontal: 16, paddingVertical: 4 },
+  filter: { minHeight: 36, borderWidth: 1, borderColor: '#D8DAE0', borderRadius: 999, paddingHorizontal: 12, justifyContent: 'center' },
   filterSelected: { backgroundColor: '#1769aa', borderColor: '#1769aa' },
   filterText: { textTransform: 'capitalize', fontWeight: '700' },
   filterTextSelected: { color: '#fff' },
